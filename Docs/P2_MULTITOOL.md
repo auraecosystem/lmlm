@@ -1,4 +1,4 @@
-:p2Multitool:
+## p2Multitool
 
 [//]: <> (UPDATE CHECKLIST)
 [//]: <> (update version in plugin-gradle/example-gradle/build.gradle)
