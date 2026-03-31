@@ -19,7 +19,7 @@
 ◉──◉──◉       ◉──◉──◉
 
 
-# About LMLM
+:About LMLM:
 
 LMLM — Local Multi-Language AI Model
 LMLM is your all-in-one, local AI toolkit for coding across multiple languages. Generate, analyze, and automate code directly on your machine — no cloud required. Fast, modular, and designed for developers who want AI to work with them, not somewhere else. From Python to Swift, LMLM handles it all. Build smarter, test faster, and stay fully in control.
