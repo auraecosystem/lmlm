@@ -20,14 +20,14 @@
         <div class="space-x-6 hidden md:block">
             <a href="#" class="hover:text-teal-400">Features</a>
             <a href="#" class="hover:text-teal-400">Docs</a>
-            <a href="https://github.com" class="btn-neon px-5 py-2 rounded-full font-semibold">GitHub</a>
+            <a href="https://github.com/web4application/lmlm/docs" class="btn-neon px-5 py-2 rounded-full font-semibold">GitHub</a>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <header class="text-center py-20 px-6 max-w-4xl mx-auto">
         <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-            Limited Memory <span class="text-teal-400">Intelligence.</span>
+            local multifunctional logic model <span class="text-teal-400">Intelligence.</span>
         </h1>
         <p class="text-lg text-slate-400 mb-10">
             The open-source framework for building high-performance, private, and searchable knowledge bases. Turn your mind-maps into interactive web applications in seconds.
