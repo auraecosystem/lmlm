@@ -1,0 +1,9 @@
+{
+  "models": [
+    {
+      "title": "My Custom Assistant",
+      "provider": "ollama",
+      "model": "lmlm/Ollama.ai"
+    }
+  ]
+}
