@@ -1,0 +1,18 @@
+// Load Bulma's base styles and themes (including the minireset)
+@use "bulma/sass/base";
+@use "bulma/sass/themes";
+
+// Load the button and title elements and components
+@use "bulma/sass/elements/button";
+@use "bulma/sass/elements/title";
+@use "bulma/sass/components/message";// Only load the columns
+@use "bulma/sass/grid/columns";
+<button class="button">Button</button>
+<button class="button is-primary">Primary button</button>
+<button class="button is-large">Large button</button>
+<button class="button is-loading">Loading button</button>
+// Load the section component with custom variables
+@use "bulma/sass/layout/section" with (
+  $section-padding: 3rem,
+  $section-padding-desktop: 4.5rem
+);
