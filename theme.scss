@@ -1,0 +1,14 @@
+@use "sass/themes/setup";
+
+@include cv.bulma-theme($name: "my-theme") {
+  // Set your own CSS variables,
+  // either manually:
+  --bulma-scheme-main-l: 7%;
+  // or using Bulma's register-vars() function:
+  @include register-vars((
+    "bulma-scheme-main-l": 7%,
+  ));
+
+  // Then, setup the new theme.
+  @include setup.setup-theme();
+}
