@@ -1,6 +1,7 @@
+=========
 Abstract
 =========
-  
+
 Humans learn and form memories in stochastic environments. Auto-associative memory systems model these processes by storing patterns and later recovering them from corrupted versions. Here, memories are learned by associating each pattern with an attractor in a latent space. After learning, when (possibly corrupted) patterns are presented to the system, latent dynamics facilitate retrieval of the appropriate uncorrupted pattern. In this work, we propose a novel online auto-associative memory system. In contrast to existing works, our system supports sequential memory formation and provides formal guarantees of robust memory retrieval via region-of-attraction analysis. We use a threshold-linear network as latent space dynamics in combination with an encoder, decoder, and controller. We show in simulation that the memory system successfully reconstructs patterns from corrupted inputs.
 
 I :Introduction:
@@ -247,14 +248,16 @@ i
 
 Our memory system uses a sub-class of TLNs called chain-structured TLNs (CSTLNs), which support multiple attractors by construction. In this paper, we will refer to a locally asymptotically stable equilibrium as an attractor1.
 
-Definition 3. A CSTLN is  (1), with 
+Definition 
+
+3. A CSTLN is  (1), with 
 W
  and 
 θ
  defined as
 W
 k
-​
+​|
 ℓ
 =
 {
