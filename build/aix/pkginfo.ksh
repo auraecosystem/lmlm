@@ -1,5 +1,5 @@
 #!/usr/bin/ksh
-TEMPDIR=$1
+TEMPDIR=$1 
 BUILD=`pwd`
 . build/aix/pkginfo
 
