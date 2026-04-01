@@ -1,4 +1,5 @@
-# Endpoints
+>### Endpoints
+
 
 ## Create Endpoint
 
@@ -6,10 +7,9 @@ Create an endpoint, currently available only for cloud endpoints
 
 ### Request
 
-POST /endpoints
+>POST /endpoints
 
-#### Example Request
-
+>#### Example Request
 ```bash
 curl \
 -X POST \
@@ -37,8 +37,8 @@ https://api.ngrok.com/endpoints
 Returns a 201 response on success
 
 #### Example Response
-
-```json
+>
+```jsonl
 {
   "bindings": [
     "public"
@@ -111,7 +111,7 @@ List all active endpoints on the account
 GET /endpoints
 
 #### Example Request
-
+>
 ```bash
 curl \
 -X GET \
@@ -125,8 +125,8 @@ https://api.ngrok.com/endpoints
 Returns a 200 response on success
 
 #### Example Response
-
-```json
+>
+```jsonl
 {
   "endpoints": [
     {
@@ -277,7 +277,7 @@ Returns a 200 response on success
 
 #### Example Response
 
-```json
+```fastjsonl
 {
   "bindings": [
     "public"
@@ -350,7 +350,7 @@ Update an Endpoint by ID, currently available only for cloud endpoints
 PATCH /endpoints/\{id}
 
 #### Example Request
-
+>
 ```bash
 curl \
 -X PATCH \
@@ -378,8 +378,8 @@ https://api.ngrok.com/endpoints/ep_32ELHJciGkvcKjnjhClgnkMIJSs
 Returns a 200 response on success
 
 #### Example Response
-
-```json
+>
+```jsonld
 {
   "bindings": [
     "public"
