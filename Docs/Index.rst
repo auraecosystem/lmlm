@@ -14,12 +14,12 @@
 ║L║║M║║L║──►║M║║U║║L║
 ╚═╝╚═╝╚═╝   ╚═╝╚═╝╚═╝
 
-[Local Multi-Language AI Model](fastau1.fast.ai)
+[Local Multi-Language AI Model](https://fastai1.fast.ai)
 
 ◉──◉──◉       ◉──◉──◉
 
 
-:About LMLM:
+# About LMLM
 
 LMLM — Local Multi-Language AI Model
 LMLM is your all-in-one, local AI toolkit for coding across multiple languages. Generate, analyze, and automate code directly on your machine — no cloud required. Fast, modular, and designed for developers who want AI to work with them, not somewhere else. From Python to Swift, LMLM handles it all. Build smarter, test faster, and stay fully in control.
@@ -37,26 +37,24 @@ Features
 	•	CLI-first: Command-line interface for fast workflow integration.
 	•	Modular & extendable: Add your own tools, scripts, and AI models easily.
 
-⸻
+
 
 # Installation
 
 # Clone the repo
+```bash
 git clone https://github.com/Web4application/lmlm.git
 cd lmlm
-
 # Optional: setup virtual environment
 python3 -m venv venv
 source venv/bin/activate
-
 # Install dependencies
 pip install -r requirements.txt
+curl -fsSL https://ollama.com/install.sh | sh
+```
 
-
-⸻
-
-CLI Usage
-
+# CLI Usage
+```init
 # Run the main AI workflow
 lmlm run
 
@@ -68,6 +66,7 @@ lmlm prompt "Create a Python function to reverse a string"
 
 # Analyze existing scripts
 lmlm analyze ./my_project
+```
 
    ## Documentation
    
@@ -138,6 +137,164 @@ _[Retrieve the version of the Ollama]
 - [openapi](https://docs.ollama.com/openapi.yaml)
 
 ## Docs
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.ollama.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Thinking
+
+Thinking-capable models emit a `thinking` field that separates their reasoning trace from the final answer.
+
+Use this capability to audit model steps, animate the model *thinking* in a UI, or hide the trace entirely when you only need the final response.
+
+## Supported models
+
+* [Qwen 3](https://ollama.com/library/qwen3)
+* [GPT-OSS](https://ollama.com/library/gpt-oss) *(use `think` levels: `low`, `medium`, `high` — the trace cannot be fully disabled)*
+* [DeepSeek-v3.1](https://ollama.com/library/deepseek-v3.1)
+* [DeepSeek R1](https://ollama.com/library/deepseek-r1)
+* Browse the latest additions under [thinking models](https://ollama.com/search?c=thinking)
+
+## Enable thinking in API calls
+
+Set the `think` field on chat or generate requests. Most models accept booleans (`true`/`false`).
+
+GPT-OSS instead expects one of `low`, `medium`, or `high` to tune the trace length.
+
+The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field contains the reasoning trace while `message.content` / `response` holds the final answer.
+
+<Tabs>
+  <Tab title="cURL">
+    ```shell  theme={"system"}
+    curl http://localhost:11434/api/chat -d '{
+      "model": "qwen3",
+      "messages": [{
+        "role": "user",
+        "content": "How many letter r are in strawberry?"
+      }],
+      "think": true,
+      "stream": false
+    }'
+    ```
+  </Tab>
+
+  <Tab title="Python">
+    ```python  theme={"system"}
+    from ollama import chat
+
+    response = chat(
+      model='qwen3',
+      messages=[{'role': 'user', 'content': 'How many letter r are in strawberry?'}],
+      think=True,
+      stream=False,
+    )
+
+    print('Thinking:\n', response.message.thinking)
+    print('Answer:\n', response.message.content)
+    ```
+  </Tab>
+
+  <Tab title="JavaScript">
+    ```jsx  theme={"system"}
+    import ollama from 'ollama'
+
+    const response = await ollama.chat({
+      model: 'deepseek-r1',
+      messages: [{ role: 'user', content: 'How many letter r are in strawberry?' }],
+      think: true,
+      stream: false,
+    })
+
+    console.log('Thinking:\n', response.message.thinking)
+    console.log('Answer:\n', response.message.content)
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  GPT-OSS requires `think` to be set to `"low"`, `"medium"`, or `"high"`. Passing `true`/`false` is ignored for that model.
+</Note>
+
+## Stream the reasoning trace
+
+Thinking streams interleave reasoning tokens before answer tokens. Detect the first `thinking` chunk to render a "thinking" section, then switch to the final reply once `message.content` arrives.
+
+<Tabs>
+  <Tab title="Python">
+    ```python  theme={"system"}
+    from ollama import chat
+
+    stream = chat(
+      model='qwen3',
+      messages=[{'role': 'user', 'content': 'What is 17 × 23?'}],
+      think=True,
+      stream=True,
+    )
+
+    in_thinking = False
+
+    for chunk in stream:
+      if chunk.message.thinking and not in_thinking:
+        in_thinking = True
+        print('Thinking:\n', end='')
+
+      if chunk.message.thinking:
+        print(chunk.message.thinking, end='')
+      elif chunk.message.content:
+        if in_thinking:
+          print('\n\nAnswer:\n', end='')
+          in_thinking = False
+        print(chunk.message.content, end='')
+
+    ```
+  </Tab>
+
+  <Tab title="JavaScript">
+    ```jst  theme={"system"}
+    import ollama from 'ollama'
+
+    async function main() {
+      const stream = await ollama.chat({
+        model: 'qwen3',
+        messages: [{ role: 'user', content: 'What is 17 × 23?' }],
+        think: true,
+        stream: true,
+      })
+
+      let inThinking = false
+
+      for await (const chunk of stream) {
+        if (chunk.message.thinking && !inThinking) {
+          inThinking = true
+          process.stdout.write('Thinking:\n')
+        }
+
+        if (chunk.message.thinking) {
+          process.stdout.write(chunk.message.thinking)
+        } else if (chunk.message.content) {
+          if (inThinking) {
+            process.stdout.write('\n\nAnswer:\n')
+            inThinking = false
+          }
+          process.stdout.write(chunk.message.content)
+        }
+      }
+    }
+
+    main()
+    ```
+  </Tab>
+</Tabs>
+
+## CLI quick reference
+
+* Enable thinking for a single run: `ollama run deepseek-r1 --think "Where should I visit in Lisbon?"`
+* Disable thinking: `ollama run deepseek-r1 --think=false "Summarize this article"`
+* Hide the trace while still using a thinking model: `ollama run deepseek-r1 --hidethinking "Is 9.9 bigger or 9.11?"`
+* Inside interactive sessions, toggle with `/set think` or `/set nothink`.
+* GPT-OSS only accepts levels: `ollama run gpt-oss --think=low "Draft a headline"` (replace `low` with `medium` or `high` as needed).
+
+<Note>Thinking is enabled by default in the CLI and API for supported models.</Note>
 
 - [Get version](https://docs.ollama.com/api-reference/get-version.md): Retrieve the version of the Ollama
 - [Show model details](https://docs.ollama.com/api-reference/show-model-details.md)
@@ -217,7 +374,7 @@ ollama signin
 <Tabs>
   <Tab title="CLI">
     To run a cloud model, open the terminal and run:
-   ```pyx
+   ```bash
     ollama run gpt-oss:120b-cloud
     ```
   </Tab>
@@ -259,13 +416,13 @@ ollama signin
 ```
 Next, install ``[Ollama's JavaScript library](https://github.com/ollama/ollama-js)``:
 
-    ```nvx
+```uvx
     npm i ollama
     ```
 ```
     Then use the library to run a cloud model:
 
-    ```typescript  theme={"system"}
+ ```typescript  theme={"system"}
     import { Ollama } from "ollama";
 
     const ollama = new Ollama();
@@ -290,7 +447,7 @@ Next, install ``[Ollama's JavaScript library](https://github.com/ollama/ollama-j
     ``
 ```
    Run the following cURL command to run the command via Ollama's API:
-  ```curl
+  ```bash
     curl http://localhost:11434/api/chat -d '{
       "model": "gpt-oss:120b-cloud",
       "messages": [{
@@ -312,8 +469,8 @@ Cloud models can also be accessed directly on ollama.com's API. In this mode, ol
 For direct access to ollama.com's API, first create an [API key](https://ollama.com/settings/keys).
 
 Then, set the `OLLAMA_API_KEY` environment variable to your API key.
-```
-```bash
+``
+```modefile
 ollama pull llama3.2
 echo "FROM llama3.2" >> Modelfile
 echo "SYSTEM You are a friendly assistant." >> Modelfile
@@ -326,7 +483,7 @@ export OLLAMA_API_KEY=your_api_key
 
 For models available directly via Ollama's API, models can be listed via:
 
-```curl
+```jsonl
 curl https://ollama.com/api/tags
 ```
 
@@ -367,7 +524,7 @@ Then make a request
   <Tab title="JavaScript">
     First, install [Ollama's JavaScript library](https://github.com/ollama/ollama-js)
 ```
-```bash
+```shell
     npm i ollama
   ```
  Next, make a request to the model:
@@ -413,7 +570,7 @@ Then make a request
 </Tabs>
 ```
 ## Local only
-```jsx
+```js
 Ollama can run in local-only mode by [disabling Ollama's cloud](./faq#how-do-i-disable-ollama-cloud) features.
 import ollama from 'ollama'
 
@@ -468,7 +625,6 @@ The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field c
   <Tab title="Python">
     ```python  theme={"system"}
     from ollama import chat
-
     response = chat(
       model='qwen3',
       messages=[{'role': 'user', 'content': 'How many letter r are in strawberry?'}],
@@ -479,21 +635,19 @@ The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field c
     print('Thinking:\n', response.message.thinking)
     print('Answer:\n', response.message.content)
   </Tab>
-  <Tab title="JavaScript">
+  <Tab title="JavaScript" >
 
-  ```javascript  theme={"system"}
-    import ollama from 'ollama'
+	  ```javascript  theme={"system"}
+  import ollama from 'ollama'
     const response = await ollama.chat({
       model: 'deepseek-r1',
       messages: [{ role: 'user', content: 'How many letter r are in strawberry?' }],
       think: true,
       stream: false,
     })
-
     console.log('Thinking:\n', response.message.thinking)
     console.log('Answer:\n', response.message.content)
-    ```
-  </Tab>
+```</Tab>
 </Tabs>
 
 <Note>
@@ -588,7 +742,7 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
 Install [marimo](https://marimo.io). You can use `pip` or `uv` for this. You
 can also use `uv` to create a sandboxed environment for marimo by running:
 
-```uv
+```uvx
 uvx marimo edit --sandbox notebook.py
 ```
 
@@ -673,7 +827,7 @@ Deploy Onyx with the [quickstart guide](https://docs.onyx.app/deployment/getting
 </div>
 
 3. Provide your **Ollama API URL** and select your models.
-   <Note>If you're running Onyx in Docker, to access your computer's local network use `http://host.docker.internal` instead of `http://127.0.0.1`.</Note>
+   <Note>If you're running Onyx in Docker, to access your computer's local network use `http://host.docker.internal` instead of `http://127.0.0.1:3000`.</Note>
 
 <div style={{ display: 'flex', justifyContent: 'center' }}>
   <img src="https://mintcdn.com/ollama-9269c548/rqi257JWXmZRsZn4/images/onyx-ollama-form.png?fit=max&auto=format&n=rqi257JWXmZRsZn4&q=85&s=f675da3f8a399614b549f72d6adaa798" alt="Selecting Ollama Models" width="75%" data-path="images/onyx-ollama-form.png" />
@@ -784,7 +938,7 @@ Provide an `images` array. SDKs accept file paths, URLs or raw bytes while the R
 
 To install Ollama, run the following command:
 
-```shell  theme={"system"}
+```zsh  theme={"system"}
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
@@ -816,9 +970,9 @@ Invoke a single tool and include its response in a follow-up request.
 Also known as "single-shot" tool calling.
 
 <Tabs>
-  <Tab title="cURL"
-    
-  ```shell  theme={"system"}
+  <Tab title="cURL">
+```shell  theme={"system"}
+	  
     curl -s http://localhost:11434/api/chat -H "Content-Type: application/json" -d '{
       "model": "qwen3",
       "messages": [{"role": "user", "content": "What is the temperature in New York?"}],
@@ -841,11 +995,11 @@ Also known as "single-shot" tool calling.
       ]
     }'
 ```
-  
+```
 ``**Generate a response with a single tool result**``
   
   ```shell  theme={"system"}
-    curl -s http://localhost:11434/api/chat -H "Content-Type: application/json" -d '{
+    curl -s http://127.0.0.1:8000/api/chat -H "Content-Type: application/json" -d '{
       "model": "qwen3",
       "messages": [
         {"role": "user", "content": "What is the temperature in New York?"},
@@ -866,19 +1020,16 @@ Also known as "single-shot" tool calling.
       ],
       "stream": false
     }'
-    ```
+```
   </Tab>
-``
   <Tab title="Python">
+	  
     Install the Ollama Python SDK:
-
-  ```bash  theme={"system"}
+```bash  theme={"system"}
     # with pip
     pip install ollama -U
-
     # with uv
     uv add ollama    
-    ```
 ```
    ```python  theme={"system"}
     from ollama import chat
@@ -908,24 +1059,22 @@ Also known as "single-shot" tool calling.
     if response.message.tool_calls:
       # only recommended for models which only return a single tool call
       call = response.message.tool_calls[0]
-      result = get_temperature(**call.function.arguments)
-      # add the tool result to the messages
+      result = get_temperature(**call.function.arguments**)
+# add the tool result to the messages
       messages.append({"role": "tool", "tool_name": call.function.name, "content": str(result)})
 
       final_response = chat(model="qwen3", messages=messages, tools=[get_temperature], think=True)
       print(final_response.message.content)
-    ```
-  </Tab>
-``
+ ```
+</Tab>
   <Tab title="JavaScript">
     Install the Ollama JavaScript library:
-  ```bash  theme={"system"}
+  
+```bash  theme={"system"}
     # with npm
     npm i ollama
-
     # with bun
     bun i ollama
-    ```
 ```
  ```typescript  theme={"system"}
     import ollama from 'ollama'
@@ -978,10 +1127,9 @@ Also known as "single-shot" tool calling.
       const finalResponse = await ollama.chat({ model: 'qwen3', messages, tools, think: true })
       console.log(finalResponse.message.content)
     }
-    ```
+```
   </Tab>
 </Tabs>
-```
 ## Parallel tool calling
 
 <Tabs>
@@ -1024,7 +1172,6 @@ Also known as "single-shot" tool calling.
         }
       ]
     }'
-    ```
 ```
  ``**Generate a response with multiple tool results**``
    ```shell  theme={"system"}
@@ -1076,11 +1223,12 @@ Also known as "single-shot" tool calling.
       ],
       "stream": false
     }'
-    ```
+```
   </Tab>
 
   <Tab title="Python">
-    ```python  theme={"system"}
+
+```python  theme={"system"}
     from ollama import chat
 
     def get_temperature(city: str) -> str:
@@ -1129,9 +1277,9 @@ Also known as "single-shot" tool calling.
       for call in response.message.tool_calls:
         # execute the appropriate tool
         if call.function.name == 'get_temperature':
-          result = get_temperature(**call.function.arguments)
+          result = get_temperature(**call.function.arguments**)
         elif call.function.name == 'get_conditions':
-          result = get_conditions(**call.function.arguments)
+          result = get_conditions(**call.function.arguments**)
         else:
           result = 'Unknown tool'
         # add the tool result to the messages
@@ -1140,13 +1288,13 @@ Also known as "single-shot" tool calling.
       # generate the final response
       final_response = chat(model='qwen3', messages=messages, tools=[get_temperature, get_conditions], think=True)
       print(final_response.message.content)
-    ```
+  ```
   </Tab>
-
-  <Tab title="JavaScript">
-    ```typescript  theme={"system"}
+  
+  <Tab title="JavaScript"> 
+  
+```typescript  theme={"system"}
     import ollama from 'ollama'
-
     function getTemperature(city: string): string {
       const temperatures: { [key: string]: string } = {
         "New York": "22°C",
@@ -1229,10 +1377,9 @@ Also known as "single-shot" tool calling.
       const finalResponse = await ollama.chat({ model: 'qwen3', messages, tools, think: true })
       console.log(finalResponse.message.content)
     }
-    ```
   </Tab>
 </Tabs>
-
+```
 ## Multi-turn tool calling (Agent loop)
 
 An agent loop allows the model to decide when to invoke tools and incorporate their results into its replies.
@@ -1289,7 +1436,7 @@ It also might help to tell the model that it is in a loop and can make multiple 
             for tc in response.message.tool_calls:
                 if tc.function.name in available_functions:
                     print(f"Calling {tc.function.name} with arguments {tc.function.arguments}")
-                    result = available_functions[tc.function.name](**tc.function.arguments)
+                    result = available_functions[tc.function.name](**tc.function.arguments**)
                     print(f"Result: {result}")
                     # add the tool result to the messages
                     messages.append({'role': 'tool', 'tool_name': tc.function.name, 'content': str(result)})
@@ -1297,7 +1444,7 @@ It also might help to tell the model that it is in a loop and can make multiple 
             # end the loop when there are no more tool calls
             break
       # continue the loop with the updated messages
-    ```
+ ```
   </Tab>
 
   <Tab title="JavaScript">
@@ -1388,7 +1535,7 @@ It also might help to tell the model that it is in a loop and can make multiple 
     }
 
     agentLoop().catch(console.error)
-    ```
+ ```
   </Tab>
 </Tabs>
 
@@ -1457,7 +1604,7 @@ When streaming, gather every chunk of `thinking`, `content`, and `tool_calls`, t
 
       for call in tool_calls:
         if call.function.name == 'get_temperature':
-          result = get_temperature(**call.function.arguments)
+          result = get_temperature(**call.function.arguments**)
         else:
           result = 'Unknown tool'
         messages.append({'role': 'tool', 'tool_name': call.function.name, 'content': result})
@@ -1549,10 +1696,10 @@ When streaming, gather every chunk of `thinking`, `content`, and `tool_calls`, t
     }
 
     agentLoop().catch(console.error)
-    ```
+```
   </Tab>
 </Tabs>
-
+```
 This loop streams the assistant response, accumulates partial fields, passes them back together, and appends the tool results so the model can complete its answer.
 
 ## Using functions as tools with Ollama Python SDK
@@ -1652,7 +1799,9 @@ response = chat(model='qwen3', messages=messages, tools=available_functions.valu
 
 ---
 
-```Start Ollama shell  theme={"system}
+_Start Ollama 
+
+```shell  theme={"system"}
 ollama serve
 ```
 
@@ -1951,15 +2100,14 @@ A Modelfile is the blueprint to create and share customized models using Ollama.
   * [LICENSE](#license)
   * [MESSAGE](#message)
 * [Notes](#notes)
+```
 
 ## Format
 
 The format of the `Modelfile`:
-
-``
 # comment
 INSTRUCTION arguments
-``
+```
 
 | Instruction                         | Description                                                    |
 | ----------------------------------- | -------------------------------------------------------------- |
@@ -2109,8 +2257,74 @@ FROM <model directory>
 - [Quickstart](https://docs.ollama.com/quickstart.md)
 - [Troubleshooting](https://docs.ollama.com/troubleshooting.md): How to troubleshoot issues encountered with Ollama
 - [Windows](https://docs.ollama.com/windows.md)
-  
-The model directory should contain the Safetensors weights for a supported architecture.
+  # Ollama
+
+## Docs
+
+- [Get version](https://docs.ollama.com/api-reference/get-version.md): Retrieve the version of the Ollama
+- [Show model details](https://docs.ollama.com/api-reference/show-model-details.md)
+- [Anthropic compatibility](https://docs.ollama.com/api/anthropic-compatibility.md)
+- [Authentication](https://docs.ollama.com/api/authentication.md)
+- [Generate a chat message](https://docs.ollama.com/api/chat.md): Generate the next chat message in a conversation between a user and an assistant.
+- [Copy a model](https://docs.ollama.com/api/copy.md)
+- [Create a model](https://docs.ollama.com/api/create.md)
+- [Delete a model](https://docs.ollama.com/api/delete.md)
+- [Generate embeddings](https://docs.ollama.com/api/embed.md): Creates vector embeddings representing the input text
+- [Errors](https://docs.ollama.com/api/errors.md)
+- [Generate a response](https://docs.ollama.com/api/generate.md): Generates a response for the provided prompt
+- [Introduction](https://docs.ollama.com/api/introduction.md)
+- [OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility.md)
+- [List running models](https://docs.ollama.com/api/ps.md): Retrieve a list of models that are currently running
+- [Pull a model](https://docs.ollama.com/api/pull.md)
+- [Push a model](https://docs.ollama.com/api/push.md)
+- [Streaming](https://docs.ollama.com/api/streaming.md)
+- [List models](https://docs.ollama.com/api/tags.md): Fetch a list of models and their details
+- [Usage](https://docs.ollama.com/api/usage.md)
+- [Embeddings](https://docs.ollama.com/capabilities/embeddings.md): Generate text embeddings for semantic search, retrieval, and RAG.
+- [Streaming](https://docs.ollama.com/capabilities/streaming.md)
+- [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs.md)
+- [Thinking](https://docs.ollama.com/capabilities/thinking.md)
+- [Tool calling](https://docs.ollama.com/capabilities/tool-calling.md)
+- [Vision](https://docs.ollama.com/capabilities/vision.md)
+- [Web search](https://docs.ollama.com/capabilities/web-search.md)
+- [CLI Reference](https://docs.ollama.com/cli.md)
+- [Cloud](https://docs.ollama.com/cloud.md)
+- [Context length](https://docs.ollama.com/context-length.md)
+- [Docker](https://docs.ollama.com/docker.md)
+- [FAQ](https://docs.ollama.com/faq.md)
+- [Hardware support](https://docs.ollama.com/gpu.md)
+- [Importing a Model](https://docs.ollama.com/import.md)
+- [Ollama's documentation](https://docs.ollama.com/index.md)
+- [Claude Code](https://docs.ollama.com/integrations/claude-code.md)
+- [Cline](https://docs.ollama.com/integrations/cline.md)
+- [Codex](https://docs.ollama.com/integrations/codex.md)
+- [Droid](https://docs.ollama.com/integrations/droid.md)
+- [Goose](https://docs.ollama.com/integrations/goose.md)
+- [Overview](https://docs.ollama.com/integrations/index.md)
+- [JetBrains](https://docs.ollama.com/integrations/jetbrains.md)
+- [marimo](https://docs.ollama.com/integrations/marimo.md)
+- [n8n](https://docs.ollama.com/integrations/n8n.md)
+- [NemoClaw](https://docs.ollama.com/integrations/nemoclaw.md)
+- [Onyx](https://docs.ollama.com/integrations/onyx.md)
+- [OpenClaw](https://docs.ollama.com/integrations/openclaw.md)
+- [OpenCode](https://docs.ollama.com/integrations/opencode.md)
+- [Pi](https://docs.ollama.com/integrations/pi.md)
+- [Roo Code](https://docs.ollama.com/integrations/roo-code.md)
+- [VS Code](https://docs.ollama.com/integrations/vscode.md)
+- [Xcode](https://docs.ollama.com/integrations/xcode.md)
+- [Zed](https://docs.ollama.com/integrations/zed.md)
+- [Linux](https://docs.ollama.com/linux.md)
+- [macOS](https://docs.ollama.com/macos.md)
+- [Modelfile Reference](https://docs.ollama.com/modelfile.md)
+- [Quickstart](https://docs.ollama.com/quickstart.md)
+- [Troubleshooting](https://docs.ollama.com/troubleshooting.md): How to troubleshoot issues encountered with Ollama
+- [Windows](https://docs.ollama.com/windows.md)
+
+## OpenAPI Specs
+
+- [openapi](https://docs.ollama.com/openapi.yaml)
+The model directory should contain
+the Safetensors weights for a supported architecture.
 
 Currently supported model architectures:
 
@@ -2119,7 +2333,20 @@ Currently supported model architectures:
 * Gemma (including Gemma 1 and Gemma 2)
 * Phi3
 # Ollama
+```pyx
+import ollama
 
+response = ollama.embed(
+    model='all-minilm',
+    input='The sky is blue because of Rayleigh scattering',
+)
+print(response.embeddings)
+#libary
+ollama.embeddings(model='all-minilm', prompt='The sky is blue because of Rayleigh scattering')
+```
+```jsx
+ollama.embeddings({ model: 'all-minilm', prompt: 'The sky is blue because of Rayleigh scattering' })
+```
 ## Docs
 
 - [Get version](https://docs.ollama.com/api-reference/get-version.md): Retrieve the version of the Ollama
@@ -2197,7 +2424,7 @@ The GGUF file location should be specified as an absolute path or relative to th
 
 The `PARAMETER` instruction defines a parameter that can be set when the model is run.
 
-```cli
+```uv
 PARAMETER <parameter> <parametervalue>
 ```
 
@@ -2228,7 +2455,7 @@ PARAMETER <parameter> <parametervalue>
 | `{{ .Prompt }}`   | The user prompt message.                                                                      |
 | `{{ .Response }}` | The response from the model. When generating a response, text after this variable is omitted. |
 
-```
+```nix
 TEMPLATE """{{ if .System }}<|im_start|>system
 {{ .System }}<|im_end|>
 {{ end }}{{ if .Prompt }}<|im_start|>user
@@ -2263,15 +2490,16 @@ Currently supported Safetensor adapters:
 
 #### GGUF adapter
 
-```
+```bash
 ADAPTER ./ollama-lora.gguf
+curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 ### LICENSE
 
 The `LICENSE` instruction allows you to specify the legal license under which the model used with this Modelfile is shared or distributed.
 
-```
+```txt
 LICENSE """
 <license text>
 """
@@ -2281,7 +2509,7 @@ LICENSE """
 
 The `MESSAGE` instruction allows you to specify a message history for the model to use when responding. Use multiple iterations of the MESSAGE command to build up a conversation which will guide the model to answer in a similar way.
 
-```
+```ini
 MESSAGE <role> <message>
 ```
 
@@ -2295,7 +2523,7 @@ MESSAGE <role> <message>
 
 #### Example conversation
 
-```
+```txt
 MESSAGE user Is Toronto in Canada?
 MESSAGE assistant yes
 MESSAGE user Is Sacramento in Canada?
@@ -2310,7 +2538,7 @@ The `REQUIRES` instruction allows you to specify the minimum version of Ollama r
 
 ```
 REQUIRES <version>
-``
+```
 
 The version should be a valid Ollama version (e.g. 0.14.0).
 
@@ -2319,7 +2547,7 @@ The version should be a valid Ollama version (e.g. 0.14.0).
 * the **`Modelfile` is not case sensitive**. In the examples, uppercase instructions are used to make it easier to distinguish it from arguments.
 * Instructions can be in any order. In the examples, the `FROM` instruction is first to keep it easily readable.
 
-[1]: https://ollama.com/library
+:[1]: https://ollama.com/library
 
 
 Remove the ollama service:
@@ -2461,8 +2689,7 @@ sudo systemctl restart docker
 
 ```shell  theme={"system"}
 docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
-``
-
+```
 <Note>
   If you're running on an NVIDIA JetPack system, Ollama can't automatically discover the correct JetPack version.
   Pass the environment variable `JETSON_JETPACK=5` or `JETSON_JETPACK=6` to the container to select version 5 or 6.
