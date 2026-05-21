@@ -1,7 +1,7 @@
 # Clone the repo
 git clone https://github.com/Web4application/lmlm.git
 cd lmlm
-
+ollama launch openclaw
 # Optional: setup virtual environment
 python3 -m venv venv
 source venv/bin/activate
