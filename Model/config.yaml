@@ -1,0 +1,5 @@
+model:
+  default: qwen2.5-coder:32b
+  provider: lmlm
+  base_url: https://localhost:11434/v1
+  context_length: 32768   # See warning below
