@@ -1,0 +1,11 @@
+# Option 1: Set server-wide via environment variable (recommended)
+OLLAMA_CONTEXT_LENGTH=32768 ollama serve
+
+# Option 2: For systemd-managed Ollama
+sudo systemctl edit ollama.service
+# Add: Environment="OLLAMA_CONTEXT_LENGTH=32768"
+# Then: sudo systemctl daemon-reload && sudo systemctl restart ollama
+
+# Option 3: Bake it into a custom model (persistent per-model)
+echo -e "FROM qwen2.5-coder:32b\nPARAMETER num_ctx 32768" > Modelfile
+ollama create qwen2.5-coder-32k -f Modelfile
