@@ -1,4 +1,4 @@
-"""Tool for generating Software Bill of Materials (SBOM) for Python's dependencies"""
+"""Tool for  generating Software Bill of Materials (SBOM) for Python's dependencies"""
 import os
 import re
 import hashlib
