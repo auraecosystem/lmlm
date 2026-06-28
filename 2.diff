@@ -1,0 +1,382 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000..a6344aa
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,35 @@
++*.7z filter=lfs diff=lfs merge=lfs -text
++*.arrow filter=lfs diff=lfs merge=lfs -text
++*.bin filter=lfs diff=lfs merge=lfs -text
++*.bz2 filter=lfs diff=lfs merge=lfs -text
++*.ckpt filter=lfs diff=lfs merge=lfs -text
++*.ftz filter=lfs diff=lfs merge=lfs -text
++*.gz filter=lfs diff=lfs merge=lfs -text
++*.h5 filter=lfs diff=lfs merge=lfs -text
++*.joblib filter=lfs diff=lfs merge=lfs -text
++*.lfs.* filter=lfs diff=lfs merge=lfs -text
++*.mlmodel filter=lfs diff=lfs merge=lfs -text
++*.model filter=lfs diff=lfs merge=lfs -text
++*.msgpack filter=lfs diff=lfs merge=lfs -text
++*.npy filter=lfs diff=lfs merge=lfs -text
++*.npz filter=lfs diff=lfs merge=lfs -text
++*.onnx filter=lfs diff=lfs merge=lfs -text
++*.ot filter=lfs diff=lfs merge=lfs -text
++*.parquet filter=lfs diff=lfs merge=lfs -text
++*.pb filter=lfs diff=lfs merge=lfs -text
++*.pickle filter=lfs diff=lfs merge=lfs -text
++*.pkl filter=lfs diff=lfs merge=lfs -text
++*.pt filter=lfs diff=lfs merge=lfs -text
++*.pth filter=lfs diff=lfs merge=lfs -text
++*.rar filter=lfs diff=lfs merge=lfs -text
++*.safetensors filter=lfs diff=lfs merge=lfs -text
++saved_model/**/* filter=lfs diff=lfs merge=lfs -text
++*.tar.* filter=lfs diff=lfs merge=lfs -text
++*.tar filter=lfs diff=lfs merge=lfs -text
++*.tflite filter=lfs diff=lfs merge=lfs -text
++*.tgz filter=lfs diff=lfs merge=lfs -text
++*.wasm filter=lfs diff=lfs merge=lfs -text
++*.xz filter=lfs diff=lfs merge=lfs -text
++*.zip filter=lfs diff=lfs merge=lfs -text
++*.zst filter=lfs diff=lfs merge=lfs -text
++*tfevents* filter=lfs diff=lfs merge=lfs -text
+diff --git a/.github/workflows/django.yml b/.github/workflows/django.yml
+new file mode 100644
+index 0000000..9766b45
+--- /dev/null
++++ b/.github/workflows/django.yml
+@@ -0,0 +1,30 @@
++name: Django CI
++
++on:
++  push:
++    branches: [ "main" ]
++  pull_request:
++    branches: [ "main" ]
++
++jobs:
++  build:
++
++    runs-on: ubuntu-latest
++    strategy:
++      max-parallel: 4
++      matrix:
++        python-version: [3.7, 3.8, 3.9]
++
++    steps:
++    - uses: actions/checkout@v4
++    - name: Set up Python ${{ matrix.python-version }}
++      uses: actions/setup-python@v3
++      with:
++        python-version: ${{ matrix.python-version }}
++    - name: Install Dependencies
++      run: |
++        python -m pip install --upgrade pip
++        pip install -r requirements.txt
++    - name: Run Tests
++      run: |
++        python manage.py test
+diff --git a/.github/workflows/lmlm.yml b/.github/workflows/lmlm.yml
+new file mode 100644
+index 0000000..1d3cc44
+--- /dev/null
++++ b/.github/workflows/lmlm.yml
+@@ -0,0 +1,36 @@
++# This is a basic workflow to help you get started with Actions
++
++name: lmlm
++
++# Controls when the workflow will run
++on:
++  # Triggers the workflow on push or pull request events but only for the "main" branch
++  push:
++    branches: [ "main" ]
++  pull_request:
++    branches: [ "main" ]
++
++  # Allows you to run this workflow manually from the Actions tab
++  workflow_dispatch:
++
++# A workflow run is made up of one or more jobs that can run sequentially or in parallel
++jobs:
++  # This workflow contains a single job called "build"
++  build:
++    # The type of runner that the job will run on
++    runs-on: ubuntu-latest
++
++    # Steps represent a sequence of tasks that will be executed as part of the job
++    steps:
++      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
++      - uses: actions/checkout@v4
++
++      # Runs a single command using the runners shell
++      - name: Run a one-line script
++        run: echo Hello, world!
++
++      # Runs a set of commands using the runners shell
++      - name: Run a multi-line script
++        run: |
++          echo Add other actions to build,
++          echo test, and deploy your project.
+diff --git a/.pq b/.pq
+new file mode 100644
+index 0000000..ebdc7a3
+--- /dev/null
++++ b/.pq
+@@ -0,0 +1,38 @@
++ID 0    <lmlm_pad>
++ID 1    <lmlm_bos>
++ID 2    <lmlm_eos>
++ID 3    <lmlm_unk>
++
++ID 4    <lmlm_system>
++ID 5    <lmlm_user>
++ID 6    <lmlm_assistant>
++
++ID 7    <lmlm_tool>
++ID 8    <lmlm_tool_call>
++ID 9    <lmlm_tool_result>
++
++ID 10   <lmlm_memory>
++
++ID 11   <lmlm_code>
++ID 12   <lmlm_python>
++ID 13   <lmlm_cpp>
++ID 14   <lmlm_rust>
++ID 15   <lmlm_go>
++
++ID 16   <lmlm_json>
++ID 17   <lmlm_xml>
++ID 18   <lmlm_yaml>
++ID 19   <lmlm_markdown>
++
++ID 20   <lmlm_image>
++ID 21   <lmlm_audio>
++ID 22   <lmlm_video>
++ID 23   <lmlm_document>
++
++ID 24   <lmlm_db_entity>
++ID 25   <lmlm_db_relationship>
++ID 26   <lmlm_db_return>
++ID 27   <lmlm_db_end>
++
++ID 28   <lmlm_function>
++ID 29   <lmlm_end_function>
+diff --git a/Arch.pq b/Arch.pq
+new file mode 100644
+index 0000000..c338399
+--- /dev/null
++++ b/Arch.pq
+@@ -0,0 +1,51 @@
++tokenizer.model
++tokenizer.json
++tokenizer_config.json
++special_tokens_map.json
++
++LMLM Nano      300M
++LMLM Mini      1B
++LMLM Small     3B
++LMLM Base      8B
++LMLM Pro      14B
++LMLM Ultra    32B
++LMLM Titan    70B
++
++<lmlm_system>
++You are LMLM.
++
++<lmlm_user>
++Explain quantum computing.
++
++<lmlm_assistant>
++Quantum computing...
++
++<lmlm_image>
++<lmlm_audio>
++<lmlm_video>
++<lmlm_document>
++<lmlm_table>
++<lmlm_graph>
++
++<lmlm_tool_call>
++
++{
++  "tool": "search",
++  "query": "weather"
++}
++
++<lmlm_tool_result>
++...
++
++LMLM
++├── lmlm-train
++├── lmlm-infer
++├── lmlm-chat
++├── lmlm-api
++├── lmlm-cli
++├── lmlm-tokenizer
++├── lmlm-hub
++├── lmlm-eval
++├── lmlm-bench
++├── lmlm-datasets
++└── lmlm-sdk
+diff --git a/LICENSE.txt b/LICENSE.txt
+deleted file mode 100644
+index 4419a70..0000000
+--- a/LICENSE.txt
++++ /dev/null
+@@ -1,29 +0,0 @@
+-/**
+- * @license React
+- * react-dom.production.min.js
+- *
+- * Copyright (c) Facebook, Inc. and its affiliates.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-/**
+- * @license React
+- * react.production.min.js
+- *
+- * Copyright (c) Facebook, Inc. and its affiliates.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-/**
+- * @license React
+- * scheduler.production.min.js
+- *
+- * Copyright (c) Facebook, Inc. and its affiliates.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+diff --git a/README.md b/README.md
+index 55ff8c8..f30e33e 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ ---
+ tittle: LMLM 
+-doc: Local Multi-Language AI Model
++doc: Local Multi-functional AI Model
+ ---
+ 
+ ```cpp```
+@@ -41,6 +41,25 @@ LMLM is your all-in-one, local AI toolkit for coding across multiple languages.
+ **GitHub Tagline (About field)** LMLM — Your local, `multi-language AI` toolkit for `coding, analysis, and automation`.
+ 
+ ---
++Model Family: LMLM
++Version: LMLM-1
++
++Architecture:
++- Decoder-only Transformer
++- Rotary Positional Embeddings (RoPE)
++- Grouped Query Attention (GQA)
++- RMSNorm
++- SwiGLU
++- Flash Attention support
++- Mixture-of-Experts support (optional in larger variants)
++
++Tokenizer:
++- SentencePiece Unigram
++- Vocabulary: 65,536 tokens
++- Unicode-native
++- Multilingual
++- Code-aware
++- 
+ 
+ ## Features
+ 
+diff --git a/bash.sh b/bash.sh
+index 6ffe581..53ee4e8 100644
+--- a/bash.sh
++++ b/bash.sh
+@@ -1,4 +1,6 @@
+-``bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi.llvms``
++curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh | bash
++
++bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi.llvms``
+ ollama pull llama3.2
+ echo "FROM llama3.2" >> Modelfile
+ echo "SYSTEM You are a friendly assistant." >> Modelfile
+diff --git a/core/bash.sh b/core/bash.sh
+new file mode 100644
+index 0000000..2c7198a
+--- /dev/null
++++ b/core/bash.sh
+@@ -0,0 +1,30 @@
++mkdir -p data/stage2/
++cd ../data/stage1/
++kaggle competitions download -c <competition name> -f test_stage_2.csv
++cd ..
++
++#DATA PROCESSING
++# The train/predict code will also call this script if it has not already been run on the relevant data.
++python ./train_code/prepare_data.py --data_dir=data/stage1/ --output_dir=data/stage1_cleaned
++
++#MODEL BUILD: There are three options to produce the solution.
++1) very fast prediction
++    a) runs in a few minutes
++    b) uses precomputed neural network predictions
++2) ordinary prediction
++    a) expect this to run for 1-2 days
++    b) uses binary model files
++3) retrain models
++    a) expect this to run about a week
++    b) trains all models from scratch
++    c) follow this with (2) to produce entire solution from scratch
++
++shell command to run each build is below
++#1) very fast prediction (overwrites comp_preds/sub1.csv and comp_preds/sub2.csv)
++python ./predict_code/calibrate_model.py
++
++#2) ordinary prediction (overwrites predictions in comp_preds directory)
++sh ./predict_code/predict_models.sh
++
++#3) retrain models (overwrites models in comp_model directory)
++sh ./train_code/train_models.sh
+diff --git a/core/init b/core/init
+new file mode 100644
+index 0000000..8b13789
+--- /dev/null
++++ b/core/init
+@@ -0,0 +1 @@
++
+diff --git a/cs.cl b/index.html
+similarity index 100%
+rename from cs.cl
+rename to index.html
+diff --git a/model/bash.zfunc b/model/bash.zfunc
+new file mode 100644
+index 0000000..55c4253
+--- /dev/null
++++ b/model/bash.zfunc
+@@ -0,0 +1,10 @@
++# Clone the repo
++git clone https://github.com/Web4application/lmlm.git
++cd lmlm
++# Optional: setup virtual environment
++python3 -m venv venv
++source venv/bin/activate
++gem install ollama-rb
++
++# Install dependencies
++pip install -r requirements.txt
+diff --git a/tests/init b/tests/init
+new file mode 100644
+index 0000000..8b13789
+--- /dev/null
++++ b/tests/init
+@@ -0,0 +1 @@
++
+diff --git a/tools/init b/tools/init
+new file mode 100644
+index 0000000..8b13789
+--- /dev/null
++++ b/tools/init
+@@ -0,0 +1 @@
++
