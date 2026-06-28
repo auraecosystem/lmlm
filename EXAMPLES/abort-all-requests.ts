@@ -1,55 +1,85 @@
-import ollama from 'ollama'
-
-// Set a timeout to abort all requests after 5 seconds
+/**
+ * EXAMPLES/abort-all-requests.ts
+ *
+ * Demonstrates:
+ * - Concurrent streaming generation
+ * - Automatic timeout cancellation
+ * - Global request abortion
+ * - Independent error handling
+ * - Clean SDK usage
+ */
+import { LMLM } from 'lmlm'
+const client = new LMLM({
+  host: 'http://localhost:11434',
+})
+const MODEL = 'lmlm-7b'
+const TIMEOUT_MS = 5_000
+/**
+ * Abort all active requests after the timeout.
+ */
 setTimeout(() => {
-  console.log('\nAborting all requests...\n')
-  ollama.abort()
-}, 5000) // 5000 milliseconds = 5 seconds
-
-// Start multiple concurrent streaming requests
-Promise.all([
-  ollama.generate({
-    model: 'llama3.2',
-    prompt: 'Write a long story about dragons',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for dragons story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 1> ' + chunk.response)
-      }
+  console.log('\n🛑 Aborting all active requests...\n')
+  client.abort()
+}, TIMEOUT_MS)
+/**
+ * Stream a generation request.
+ */
+async function generate(
+  id: number,
+  prompt: string,
+): Promise<void> {
+  try {
+    console.log(`🚀 Starting request ${id}`)
+    const stream = await client.generate({
+      model: MODEL,
+      prompt,
+      stream: true,
+    })
+    for await (const chunk of stream) {
+      process.stdout.write(`[${id}] ${chunk.response}`)
     }
-  ),
-
-  ollama.generate({
-    model: 'lmlm', 
-    prompt: 'Write a long story about wizards',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for wizards story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 2> ' + chunk.response)
-      }
+    console.log(`\n✅ Request ${id} completed`)
+  } catch (error: any) {
+    switch (error.name) {
+      case 'AbortError':
+        console.log(`🛑 Request ${id} aborted`)
+        break
+      case 'ModelNotFoundError':
+        console.error(`❌ Model "${MODEL}" not found`)
+        break
+      case 'ConnectionError':
+        console.error(`❌ Unable to connect to the LMLM server`)
+        break
+      default:
+        console.error(`❌ Request ${id} failed`, error)
     }
-  ),
-
-  ollama.generate({
-    model: 'lmkm',
-    prompt: 'Write a long story about knights',
-    stream: true,
-  }).then(
-    async (stream) => {
-      console.log(' Starting stream for knights story...')
-      for await (const chunk of stream) {
-        process.stdout.write(' 3>' + chunk.response)
-      }
-    }
-  )
-]).catch(error => {
-  if (error.name === 'AbortError') {
-    console.log('All requests have been aborted')
-  } else {
-    console.error('An error occurred:', error)
   }
+}
+/**
+ * Application entry point.
+ */
+async function main() {
+  console.log('======================================')
+  console.log(' LMLM Concurrent Streaming Demo')
+  console.log('======================================\n')
+  console.log(`Model   : ${MODEL}`)
+  console.log(`Timeout : ${TIMEOUT_MS} ms\n`)
+  await Promise.all([
+    generate(
+      1,
+      'Write a long fantasy story about dragons protecting an ancient kingdom.'
+    ),
+    generate(
+      2,
+      'Write a long fantasy story about powerful wizards discovering forgotten magic.'
+    ),
+    generate(
+      3,
+      'Write a long fantasy story about legendary knights defending a sacred relic.'
+    ),
+  ])
+  console.log('\n🎉 Demo finished.')
+}
+main().catch((error) => {
+  console.error('Fatal Error:', error)
 })
