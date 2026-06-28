@@ -1,0 +1,13 @@
+@lmlm/core          // Base SDK
+@lmlm/server        // Self-hosted inference server
+@lmlm/models        // Model management
+@lmlm/vision        // Image understanding
+@lmlm/audio         // Speech and audio
+@lmlm/code          // Programming features
+@lmlm/agent         // Autonomous agents
+@lmlm/vector        // Embeddings and vector search
+@lmlm/document      // PDF, Word, OCR
+@lmlm/web           // Browser automation
+@lmlm/mobile        // Mobile SDK
+@lmlm/cloud         // Managed cloud service
+@lmlm/cli           // Command-line interface
