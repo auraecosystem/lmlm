@@ -1,0 +1,27 @@
+GET    /api/version
+GET    /api/health
+
+GET    /api/models
+POST   /api/models/create
+POST   /api/models/pull
+POST   /api/models/push
+DELETE /api/models/{name}
+
+POST   /api/generate
+POST   /api/chat
+POST   /api/embed
+POST   /api/tokenize
+POST   /api/detokenize
+
+POST   /api/vision
+POST   /api/audio/transcribe
+POST   /api/audio/speech
+
+POST   /api/agent/run
+POST   /api/tools/call
+
+POST   /api/files/upload
+GET    /api/files
+
+POST   /api/abort
+GET    /api/metrics
