@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 # Connect to LM Studio
-client = OpenAI(base_url="https://127.0.0.1:8000/v1", api_key="lmlm")
+client = OpenAI(base_url="https://localhost:3000/v1", api_key="lmlm")
 
 # Define a simple function
 def say_hello(name: str) -> str:
