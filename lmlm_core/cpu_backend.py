@@ -20,7 +20,6 @@ class NativeCPUBackend:
     """
 
     def __init__(self, *, seed: int | None = None) -> None:
-        self._seed = seed
         self._model: CPUTransformer | None = None
         self._tokenizer: ByteLevelBPETokenizer | None = None
         self._rng = random.Random(seed)
