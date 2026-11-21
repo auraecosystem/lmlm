@@ -52,6 +52,8 @@ class ByteLevelBPETokenizer:
             raise TokenizerError("vocabulary IDs must be non-negative integers")
         if len(set(ids)) != len(ids):
             raise TokenizerError("vocabulary IDs must be unique")
+        if set(ids) != set(range(len(ids))):
+            raise TokenizerError("vocabulary IDs must be contiguous from zero")
         self.vocab = dict(vocab)
         self.inverse_vocab = {token_id: token for token, token_id in vocab.items()}
         self.ranks: dict[tuple[str, str], int] = {}
