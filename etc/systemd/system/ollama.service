@@ -1,1 +1,21 @@
+[Unit]
+Description=Ollama Service
+After=network-online.target
 
+[Service]
+ExecStart=/usr/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
+Environment="PATH=$PATH"
+
+import ollama from 'ollama'
+
+const response = await ollama.chat({
+  model: 'glm4:9b',
+  messages: [{role: 'user', content: 'Hello!'}],
+})
+console.log(response.message.content)
+[Install]
+WantedBy=multi-user.target
