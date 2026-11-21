@@ -11,7 +11,7 @@ from .backend import LocalOpenAIBackend, ProcessorBackendError
 from .protocol import ProcessorRequest, error_response
 
 LOG = logging.getLogger("lmlm_processor")
-MAX_BODY_BYTES = 16 * 1024 * 1024
+MAX_BODY_BYTES = 18 * 1024 * 1024
 
 
 class ProcessorServer(ThreadingHTTPServer):
