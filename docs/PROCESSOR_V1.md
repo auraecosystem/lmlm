@@ -53,7 +53,7 @@ Payload bytes use hexadecimal encoding to keep the wire format dependency-free a
 
 - Service binds only to loopback addresses.
 - Inference URL must be plain HTTP on loopback; TLS and remote endpoints are intentionally not enabled in this local adapter.
-- Request body is limited to 16 MiB; decoded payload is limited to 8 MiB.
+- Request body is limited to 18 MiB; decoded payload is limited to 8 MiB.
 - Text generation is capped at 4096 output tokens and temperature 0–2.
 - This service has no authentication because it is loopback-only. Do not expose it through a tunnel or public reverse proxy.
 - This is a local inference adapter, not a model implementation. The model process and weights remain separate local runtime assets.
