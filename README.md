@@ -46,6 +46,10 @@ LMLM is your all-in-one, local AI toolkit for coding across multiple languages. 
 
 LMLM exposes the versioned `lmlm.processor.v1` local service for LMLMxtend. It currently adapts text generation through a loopback-only local inference endpoint; image, audio, video, and mixed-modality execution remain pending native backends. See [Processor v1](docs/PROCESSOR_V1.md).
 
+## Native CPU inference v1
+
+LMLM now includes a dependency-free reference CPU transformer, a local byte-level BPE tokenizer, validated model-weight loading, and autoregressive text generation through `NativeCPUBackend`. This first native path runs a small GPT-like decoder directly inside LMLM; it is designed for correctness and tiny models, not production-scale speed. See [Native CPU Inference v1](docs/NATIVE_CPU_INFERENCE_V1.md) for the model format, constraints, and usage.
+
 ## Features
 
 - **```Multi-language support```:** Python, JavaScript, Swift, Java, C++, and more.  
