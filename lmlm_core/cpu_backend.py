@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import random
 from pathlib import Path
 
@@ -57,13 +58,36 @@ class NativeCPUBackend:
         prompt_ids = self._tokenizer.encode(request.prompt, add_bos=True)
         if not prompt_ids:
             raise ValueError("tokenizer produced an empty prompt")
-        output_ids = self._model.generate(
-            prompt_ids,
-            request.max_new_tokens,
-            temperature=float(request.temperature),
-            top_p=float(request.top_p),
-            rng=self._rng,
-        )
+        output_ids = list(prompt_ids)
+        for _ in range(request.max_new_tokens):
+            logits = self._model.logits(output_ids[-self._model.max_seq_len:])
+            if request.temperature == 0:
+                next_id = max(range(len(logits)), key=logits.__getitem__)
+            else:
+                scaled = [score / float(request.temperature) for score in logits]
+                maximum = max(scaled)
+                probabilities = [math.exp(max(-80.0, score - maximum)) for score in scaled]
+                total = sum(probabilities)
+                probabilities = [probability / total for probability in probabilities]
+                ranked = sorted(range(len(probabilities)), key=probabilities.__getitem__, reverse=True)
+                retained = []
+                cumulative = 0.0
+                for token_id in ranked:
+                    retained.append(token_id)
+                    cumulative += probabilities[token_id]
+                    if cumulative >= float(request.top_p):
+                        break
+                retained_total = sum(probabilities[token_id] for token_id in retained)
+                threshold = self._rng.random() * retained_total
+                next_id = retained[-1]
+                for token_id in retained:
+                    threshold -= probabilities[token_id]
+                    if threshold <= 0:
+                        next_id = token_id
+                        break
+            output_ids.append(next_id)
+            if self._model.eos_token_id is not None and next_id == self._model.eos_token_id:
+                break
         generated_ids = output_ids[len(prompt_ids):]
         stop_id = self._tokenizer.vocab.get(self._tokenizer.eos_token) if self._tokenizer.eos_token else None
         if stop_id is not None and generated_ids and generated_ids[-1] == stop_id:
