@@ -1,6 +1,6 @@
 ---
 tittle: LMLM 
-doc: Local Multi-Language AI Model
+doc: Large Multimodal Local Model
 ---
 
 ```cpp```
@@ -41,6 +41,10 @@ LMLM is your all-in-one, local AI toolkit for coding across multiple languages. 
 **GitHub Tagline (About field)** LMLM — Your local, `multi-language AI` toolkit for `coding, analysis, and automation`.
 
 ---
+
+## Local processor integration
+
+LMLM exposes the versioned `lmlm.processor.v1` local service for LMLMxtend. It currently adapts text generation through a loopback-only local inference endpoint; image, audio, video, and mixed-modality execution remain pending native backends. See [Processor v1](docs/PROCESSOR_V1.md).
 
 ## Features
 

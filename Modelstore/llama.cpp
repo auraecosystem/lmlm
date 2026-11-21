@@ -5,4 +5,4 @@ cmake -B build && cmake --build build --config Release
   -c 32768 \
   -ngl 99 \
   -m models/qwen2.5-coder-32b-instruct-Q4_K_M.gguf \
-  --port 8080 --host 0.0.0.0
+  --port 8080 --host 127.0.0.1
