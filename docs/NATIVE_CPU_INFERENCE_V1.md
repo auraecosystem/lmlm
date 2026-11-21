@@ -55,8 +55,7 @@ directory. No automatic downloads are performed.
 {
   "format_version": 1,
   "vocab": {
-    "token-piece": 0,
-    "<|bos|>": 259
+    "...": "abbreviated; a real vocabulary has contiguous IDs for every token"
   },
   "merges": [["left-piece", "right-piece"]],
   "bos_token": "<|bos|>",
@@ -123,8 +122,9 @@ engine.close()
 - Pure Python CPU math; no NumPy, BLAS, GPU, or accelerator dependency.
 - Reference backend caps model dimensions and total parameters (5 million)
   and rejects weights files larger than 64 MiB.
-- JSON float32 metadata is used as the portable interchange representation;
-  it is not a compact or fast production checkpoint format.
+- JSON decimal weights are range-checked and rounded to IEEE-754 float32 on
+  load; arithmetic then uses Python floats. This is a portable interchange
+  representation, not a compact or fast production checkpoint format.
 - No KV cache: each token recomputes the active context.
 - No quantization, optimized kernels, distributed execution, or streaming.
 - The architecture is a small GPT-like decoder with learned position
