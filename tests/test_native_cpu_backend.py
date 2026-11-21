@@ -13,6 +13,8 @@ from lmlm_core import (
     TokenizerError,
 )
 from lmlm_core.tokenizer import _BYTE_ENCODER
+from lmlm_processor.native_backend import NativeCPUProcessorBackend
+from lmlm_processor.protocol import ProcessorRequest
 
 
 def make_tiny_model(directory: Path) -> ModelManifest:
@@ -103,6 +105,33 @@ class NativeCPUBackendTests(unittest.TestCase):
             self.assertEqual(result.generated_tokens, 2)
             self.assertEqual(result.finish_reason, "length")
             engine.close()
+
+    def test_processor_v1_runs_on_native_cpu_engine(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            manifest = make_tiny_model(directory)
+            (directory / "lmlm-model.json").write_text(json.dumps({
+                "format_version": 1,
+                "model_id": manifest.model_id,
+                "architecture": manifest.architecture,
+                "tokenizer": manifest.tokenizer,
+                "weights": manifest.weights,
+                "tensor_dtype": manifest.tensor_dtype,
+                "context_length": manifest.context_length,
+                "vocabulary_size": manifest.vocabulary_size,
+            }), encoding="utf-8")
+            backend = NativeCPUProcessorBackend(directory, seed=11)
+            backend.health_check()
+            response = backend.process(ProcessorRequest(
+                request_id="native-processor-test",
+                modality="text",
+                content_type="text/plain",
+                payload=b"x",
+                parameters={"max_tokens": 2, "temperature": 0},
+            ))
+            self.assertEqual(response.request_id, "native-processor-test")
+            self.assertEqual(response.payload.decode("utf-8"), "!!")
+            backend.close()
 
     def test_rejects_weights_outside_float32_range(self):
         with tempfile.TemporaryDirectory() as temporary:
