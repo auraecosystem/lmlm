@@ -56,13 +56,18 @@ class ByteLevelBPETokenizer:
             raise TokenizerError("vocabulary IDs must be contiguous from zero")
         self.vocab = dict(vocab)
         self.inverse_vocab = {token_id: token for token, token_id in vocab.items()}
+        if any(not isinstance(token, str) or not token for token in vocab):
+            raise TokenizerError("vocabulary tokens must be non-empty strings")
         self.ranks: dict[tuple[str, str], int] = {}
         for rank, pair in enumerate(merges):
-            if len(pair) != 2 or not all(isinstance(part, str) and part for part in pair):
+            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                raise TokenizerError("each merge must be a pair of strings")
+            if not all(isinstance(part, str) and part for part in pair):
                 raise TokenizerError("each merge must contain two non-empty strings")
-            if pair in self.ranks:
+            normalized_pair = (pair[0], pair[1])
+            if normalized_pair in self.ranks:
                 raise TokenizerError("duplicate merge pair")
-            self.ranks[pair] = rank
+            self.ranks[normalized_pair] = rank
         self.bos_token = bos_token
         self.eos_token = eos_token
         self.unk_token = unk_token
@@ -73,8 +78,11 @@ class ByteLevelBPETokenizer:
 
     @classmethod
     def from_file(cls, path: str | Path) -> "ByteLevelBPETokenizer":
+        tokenizer_file = Path(path)
+        if tokenizer_file.stat().st_size > 16 * 1024 * 1024:
+            raise TokenizerError("tokenizer file exceeds the 16 MiB safety limit")
         try:
-            value: Any = json.loads(Path(path).read_text(encoding="utf-8"))
+            value: Any = json.loads(tokenizer_file.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise TokenizerError(f"cannot read tokenizer file: {exc}") from exc
         if not isinstance(value, dict) or value.get("format_version") != 1:
