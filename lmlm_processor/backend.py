@@ -22,7 +22,7 @@ class LocalOpenAIBackend:
 
     def __init__(self, base_url: str = "http://127.0.0.1:8080/v1", timeout: float = 120.0):
         parsed = urlsplit(base_url)
-        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}:
+        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1"}:
             raise ValueError("LMLM inference URL must use plain HTTP on a loopback address")
         if parsed.username or parsed.password or parsed.query or parsed.fragment:
             raise ValueError("credentials, query strings, and fragments are not allowed in inference URL")
