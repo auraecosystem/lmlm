@@ -124,8 +124,9 @@ engine.close()
 ## Current constraints
 
 - Pure Python CPU math; no NumPy, BLAS, GPU, or accelerator dependency.
-- Reference backend caps model dimensions and total parameters (5 million)
-  and rejects weights files larger than 64 MiB.
+- Reference backend caps model dimensions, total parameters (5 million),
+  estimated inference work, prompt input (at most 4096 UTF-8 bytes and the
+  model context limit), and weights files (64 MiB).
 - JSON decimal weights are range-checked and rounded to IEEE-754 float32 on
   load; arithmetic then uses Python floats. This is a portable interchange
   representation, not a compact or fast production checkpoint format.
