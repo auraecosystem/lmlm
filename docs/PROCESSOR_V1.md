@@ -1,42 +1,69 @@
 # LMLM Processor v1
 
-LMLM now exposes a versioned, loopback-only processor service that can be consumed by LMLMxtend. The protocol is intentionally independent of any cloud provider.
+LMLM exposes a versioned, loopback-only processor service consumed by
+LMLMxtend. The protocol is independent of cloud providers.
 
 ## Architecture
 
 ```text
-LMLM local model process (for example, a locally loaded GGUF model)
-                 ^
-                 | localhost OpenAI-compatible inference API
-                 |
-LMLM Processor v1 (Python, loopback only :8765)
-                 ^
-                 | HTTP + JSON, protocol lmlm.processor.v1
-                 |
-LMLMxtend HttpLmlmProcessor adapter
-                 ^
-                 |
-LMLMxtend Extension Runtime / agents / applications
+LMLM native CPU model assets
+       |
+       v
+NativeCPUBackend -> LMLMEngine
+       |                 |
+       +------ Processor v1 service (127.0.0.1:8765)
+                          |
+                   HTTP + JSON
+                 lmlm.processor.v1
+                          |
+             LMLMxtend HttpLmlmProcessor
+                          |
+            Extensions / agents / applications
 ```
 
-The service adapter talks only to a loopback inference endpoint. It rejects non-loopback URLs, does not download model weights, does not call remote providers, and has no cloud fallback. The local inference process and model weights must already be installed by the operator.
+The service supports two local modes:
 
-## Start a local inference process
+- `native_cpu`: loads LMLM's tokenizer and CPU transformer directly from a
+  local model directory. No separate inference server is required.
+- `local_openai`: compatibility mode for an already-running local
+  OpenAI-compatible inference endpoint.
 
-The repository's `Modelstore/llama.cpp` notes show a local llama-server workflow. Start that local server with the desired local model, bound to loopback, and expose its OpenAI-compatible API on port 8080. Do not bind it to a public interface.
+Neither mode downloads model weights, calls remote providers, or falls back
+to cloud inference.
 
-## Start the LMLM processor service
+## Native CPU mode (recommended)
+
+Prepare a local model directory containing `lmlm-model.json`,
+`tokenizer.json`, and `weights.json` using the format documented in
+[Native CPU Inference v1](NATIVE_CPU_INFERENCE_V1.md).
 
 From the repository root:
 
 ```bash
-LMLM_INFERENCE_URL=http://127.0.0.1:8080/v1 \\
-LMLM_PROCESSOR_HOST=127.0.0.1 \\
-LMLM_PROCESSOR_PORT=8765 \\
+LMLM_BACKEND=native_cpu \
+LMLM_MODEL_DIR=./model \
+LMLM_PROCESSOR_HOST=127.0.0.1 \
+LMLM_PROCESSOR_PORT=8765 \
 python -m lmlm_processor.server
 ```
 
-The processor service uses only Python's standard library. It expects the local inference server to implement `GET /health` and `POST /v1/chat/completions`.
+The service loads the model once at startup and serves generation requests
+through the in-process native CPU engine.
+
+## Compatibility mode
+
+The existing local inference adapter remains available:
+
+```bash
+LMLM_BACKEND=local_openai \
+LMLM_INFERENCE_URL=http://127.0.0.1:8080/v1 \
+LMLM_PROCESSOR_HOST=127.0.0.1 \
+LMLM_PROCESSOR_PORT=8765 \
+python -m lmlm_processor.server
+```
+
+The local inference endpoint must be bound to loopback and implement
+`GET /health` and `POST /v1/chat/completions`.
 
 ## Protocol
 
@@ -44,19 +71,27 @@ The processor service uses only Python's standard library. It expects the local 
 - Protocol version: `1`
 - Health: `GET /v1/health`
 - Process: `POST /v1/process`
-- Request fields: `request_id`, `modality`, `content_type`, `payload_hex`, optional `prompt` and `parameters`
+- Request fields: `request_id`, `modality`, `content_type`,
+  `payload_hex`, optional `prompt` and `parameters`
 - Response fields: `request_id`, `content_type`, `payload_hex`
 
-Payload bytes use hexadecimal encoding to keep the wire format dependency-free and lossless. The initial local inference backend supports text only. Other modalities are represented by the protocol but are rejected until their LMLM-native preprocessing and inference backends are implemented.
+Payload bytes use hexadecimal encoding for lossless, dependency-free
+transport. Both current execution modes support text only. Image, audio,
+video, and mixed modalities are represented by the protocol but rejected
+until their LMLM-native preprocessing and inference backends are implemented.
 
 ## Limits and security
 
-- Service binds only to loopback addresses.
-- Inference URL must be plain HTTP on loopback; TLS and remote endpoints are intentionally not enabled in this local adapter.
-- Request body is limited to 16 MiB; decoded payload is limited to 8 MiB.
-- Text generation is capped at 4096 output tokens and temperature 0–2.
-- This service has no authentication because it is loopback-only. Do not expose it through a tunnel or public reverse proxy.
-- This is a local inference adapter, not a model implementation. The model process and weights remain separate local runtime assets.
+- Service binds only to `127.0.0.1`.
+- Compatibility mode accepts only plain HTTP loopback inference URLs.
+- Request body is limited to 18 MiB; decoded payload is limited to 8 MiB.
+- The native reference CPU engine limits model size to 5 million parameters
+  and weights files to 64 MiB.
+- Text generation is capped at 4096 output tokens by the compatibility
+  backend; native mode applies the engine's 32768-token request ceiling.
+- No authentication is configured because the service is loopback-only.
+  Do not expose it through a tunnel or public reverse proxy.
+- Model assets must be installed locally by the operator.
 
 ## Tests
 
