@@ -109,6 +109,10 @@ class CPUTransformer:
         )
         if parameter_budget > 5_000_000:
             raise ModelFormatError("model exceeds the 5-million-parameter reference CPU budget")
+        attention_work = self.num_layers * self.max_seq_len * self.max_seq_len * self.hidden_size
+        feed_forward_work = 2 * self.num_layers * self.max_seq_len * self.hidden_size * self.intermediate_size
+        if attention_work + feed_forward_work > 250_000_000:
+            raise ModelFormatError("model exceeds the reference CPU compute budget")
         self.eos_token_id = config.get("eos_token_id")
         if self.eos_token_id is not None and (
             isinstance(self.eos_token_id, bool)
