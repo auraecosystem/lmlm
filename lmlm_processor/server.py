@@ -78,8 +78,19 @@ def main():
     if host not in {"127.0.0.1"}:
         raise SystemExit("LMLM processor service may only bind to loopback")
     port = int(os.getenv("LMLM_PROCESSOR_PORT", "8765"))
-    inference_url = os.getenv("LMLM_INFERENCE_URL", "http://127.0.0.1:8080/v1")
-    backend = LocalOpenAIBackend(inference_url)
+    backend_mode = os.getenv("LMLM_BACKEND", "local_openai").strip().lower()
+    if backend_mode == "native_cpu":
+        model_dir = os.getenv("LMLM_MODEL_DIR")
+        if not model_dir:
+            raise SystemExit("LMLM_MODEL_DIR is required when LMLM_BACKEND=native_cpu")
+        from .native_backend import NativeCPUProcessorBackend
+
+        backend = NativeCPUProcessorBackend(model_dir)
+    elif backend_mode == "local_openai":
+        inference_url = os.getenv("LMLM_INFERENCE_URL", "http://127.0.0.1:8080/v1")
+        backend = LocalOpenAIBackend(inference_url)
+    else:
+        raise SystemExit("LMLM_BACKEND must be 'native_cpu' or 'local_openai'")
     server = ProcessorServer((host, port), backend)
     LOG.info("LMLM Processor v1 listening on %s:%s", host, port)
     try:
@@ -88,6 +99,9 @@ def main():
         LOG.info("Shutting down LMLM Processor v1")
     finally:
         server.server_close()
+        close_backend = getattr(backend, "close", None)
+        if callable(close_backend):
+            close_backend()
 
 
 if __name__ == "__main__":
