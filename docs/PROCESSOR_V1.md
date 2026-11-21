@@ -19,7 +19,7 @@ LMLMxtend HttpLmlmProcessor adapter
 LMLMxtend Extension Runtime / agents / applications
 ```
 
-The service adapter talks only to a loopback inference endpoint. It rejects non-loopback URLs, does not download model weights, does not call remote providers, and has no cloud fallback. The local inference process and model weights must already be installed by the operator.
+The service supports two local modes. The compatibility mode talks to an already-running loopback OpenAI-compatible inference endpoint. The native mode loads the LMLM tokenizer and CPU transformer directly from a local model directory. Neither mode downloads model weights, calls remote providers, or falls back to cloud inference.
 
 ## Start a local inference process
 
@@ -47,16 +47,16 @@ The processor service uses only Python's standard library. It expects the local 
 - Request fields: `request_id`, `modality`, `content_type`, `payload_hex`, optional `prompt` and `parameters`
 - Response fields: `request_id`, `content_type`, `payload_hex`
 
-Payload bytes use hexadecimal encoding to keep the wire format dependency-free and lossless. The initial local inference backend supports text only. Other modalities are represented by the protocol but are rejected until their LMLM-native preprocessing and inference backends are implemented.
+Payload bytes use hexadecimal encoding to keep the wire format dependency-free and lossless. Both current execution modes support text only. Image, audio, video, and mixed modalities are represented by the protocol but rejected until their LMLM-native preprocessing and inference backends are implemented.
 
 ## Limits and security
 
 - Service binds only to loopback addresses.
-- Inference URL must be plain HTTP on loopback; TLS and remote endpoints are intentionally not enabled in this local adapter.
+- In compatibility mode, the inference URL must be plain HTTP on loopback; TLS and remote endpoints are intentionally not enabled.
 - Request body is limited to 16 MiB; decoded payload is limited to 8 MiB.
 - Text generation is capped at 4096 output tokens and temperature 0–2.
 - This service has no authentication because it is loopback-only. Do not expose it through a tunnel or public reverse proxy.
-- This is a local inference adapter, not a model implementation. The model process and weights remain separate local runtime assets.
+- Native mode uses the in-process reference CPU transformer and local model assets; see its documented 5-million-parameter and 64 MiB weight-file limits. Compatibility mode still requires a separately installed local inference runtime.
 
 ## Tests
 
