@@ -6,6 +6,7 @@ from pathlib import Path
 from lmlm_core import (
     ByteLevelBPETokenizer,
     GenerationRequest,
+    ModelFormatError,
     ModelManifest,
     NativeCPUBackend,
     TokenizerError,
@@ -101,6 +102,17 @@ class NativeCPUBackendTests(unittest.TestCase):
             self.assertEqual(result.generated_tokens, 2)
             self.assertEqual(result.finish_reason, "length")
             backend.close()
+
+    def test_rejects_weights_outside_float32_range(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            manifest = make_tiny_model(directory)
+            weights_path = directory / "weights.json"
+            weights = json.loads(weights_path.read_text(encoding="utf-8"))
+            weights["weights"]["token_embedding"][0][0] = 1e100
+            weights_path.write_text(json.dumps(weights), encoding="utf-8")
+            with self.assertRaises(ModelFormatError):
+                NativeCPUBackend().load(manifest, str(directory))
 
     def test_rejects_tokenizer_path_traversal(self):
         with tempfile.TemporaryDirectory() as temporary:
