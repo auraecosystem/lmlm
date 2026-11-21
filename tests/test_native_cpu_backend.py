@@ -6,6 +6,7 @@ from pathlib import Path
 from lmlm_core import (
     ByteLevelBPETokenizer,
     GenerationRequest,
+    LMLMEngine,
     ModelFormatError,
     ModelManifest,
     NativeCPUBackend,
@@ -95,13 +96,13 @@ class NativeCPUBackendTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             manifest = make_tiny_model(directory)
-            backend = NativeCPUBackend(seed=7)
-            backend.load(manifest, str(directory))
-            result = backend.generate(GenerationRequest("x", max_new_tokens=2, temperature=0))
+            engine = LMLMEngine(NativeCPUBackend(seed=7))
+            engine.load(manifest, str(directory))
+            result = engine.generate(GenerationRequest("x", max_new_tokens=2, temperature=0))
             self.assertEqual(result.text, "!!")
             self.assertEqual(result.generated_tokens, 2)
             self.assertEqual(result.finish_reason, "length")
-            backend.close()
+            engine.close()
 
     def test_rejects_weights_outside_float32_range(self):
         with tempfile.TemporaryDirectory() as temporary:
