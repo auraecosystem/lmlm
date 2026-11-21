@@ -62,8 +62,11 @@ class CPUTransformer:
     """
 
     def __init__(self, weights_path: str | Path):
+        weights_file = Path(weights_path)
+        if weights_file.stat().st_size > 64 * 1024 * 1024:
+            raise ModelFormatError("reference CPU weights file exceeds the 64 MiB safety limit")
         try:
-            value = json.loads(Path(weights_path).read_text(encoding="utf-8"))
+            value = json.loads(weights_file.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise ModelFormatError(f"cannot read model weights: {exc}") from exc
         if not isinstance(value, dict) or value.get("format") != "lmlm.cpu.transformer.v1":
@@ -80,8 +83,21 @@ class CPUTransformer:
         self.max_seq_len = self._integer(config, "max_seq_len", 1, 131072)
         if self.hidden_size % self.num_heads:
             raise ModelFormatError("hidden_size must be divisible by num_heads")
-        if self.hidden_size > 1024 or self.num_layers > 16 or self.intermediate_size > 4096:
-            raise ModelFormatError("reference CPU backend limits exceeded")
+        if self.hidden_size > 512 or self.num_layers > 8 or self.intermediate_size > 2048:
+            raise ModelFormatError("reference CPU backend dimension limits exceeded")
+        parameter_budget = (
+            self.vocab_size * self.hidden_size
+            + self.max_seq_len * self.hidden_size
+            + self.num_layers * (
+                4 * self.hidden_size * self.hidden_size
+                + 2 * self.intermediate_size * self.hidden_size
+                + 8 * self.hidden_size
+                + 2 * self.intermediate_size
+            )
+            + 2 * self.hidden_size
+        )
+        if parameter_budget > 5_000_000:
+            raise ModelFormatError("model exceeds the 5-million-parameter reference CPU budget")
         self.eos_token_id = config.get("eos_token_id")
         if self.eos_token_id is not None and (
             isinstance(self.eos_token_id, bool)
