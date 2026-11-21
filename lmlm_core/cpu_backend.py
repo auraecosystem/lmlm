@@ -60,9 +60,15 @@ class NativeCPUBackend:
     def generate(self, request: GenerationRequest) -> GenerationResult:
         if self._model is None or self._tokenizer is None:
             raise RuntimeError("native CPU backend is not loaded")
+        prompt_bytes = request.prompt.encode("utf-8")
+        prompt_limit = min(4096, self._model.max_seq_len * 4)
+        if len(prompt_bytes) > prompt_limit:
+            raise ValueError(f"prompt exceeds the reference CPU limit of {prompt_limit} UTF-8 bytes")
         prompt_ids = self._tokenizer.encode(request.prompt, add_bos=True)
         if not prompt_ids:
             raise ValueError("tokenizer produced an empty prompt")
+        if len(prompt_ids) > self._model.max_seq_len:
+            raise ValueError("tokenized prompt exceeds model max_seq_len")
         output_ids = list(prompt_ids)
         for _ in range(request.max_new_tokens):
             logits = self._model.logits(output_ids[-self._model.max_seq_len:])
