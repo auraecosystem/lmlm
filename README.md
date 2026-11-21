@@ -44,7 +44,7 @@ LMLM is your all-in-one, local AI toolkit for coding across multiple languages. 
 
 ## Local processor integration
 
-LMLM exposes the versioned `lmlm.processor.v1` local service for LMLMxtend. It currently adapts text generation through a loopback-only local inference endpoint; image, audio, video, and mixed-modality execution remain pending native backends. See [Processor v1](docs/PROCESSOR_V1.md).
+LMLM exposes the versioned `lmlm.processor.v1` local service for LMLMxtend. It can now run directly on the in-process native CPU engine or use the optional loopback-only compatibility adapter. Image, audio, video, and mixed-modality execution remain pending native backends. See [Processor v1](docs/PROCESSOR_V1.md).
 
 ## Native CPU inference v1
 
