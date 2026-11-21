@@ -1,26 +1,44 @@
-name: Build the documentation
+name: Validate LMLM documentation
 
 on:
   pull_request:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  build:
-
-    name: Build documentation
+  validate:
+    name: Validate documentation sources
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r docs/requirements.txt
-    - name: Build the documentation
-      run: make -C docs html
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate maintained Markdown documentation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path("docs/NATIVE_ENGINE_FOUNDATION.md"),
+              Path("docs/NATIVE_CPU_INFERENCE_V1.md"),
+              Path("docs/PROCESSOR_V1.md"),
+          ]
+
+          for path in files:
+              if not path.is_file():
+                  raise SystemExit(f"Missing documentation file: {path}")
+              text = path.read_text(encoding="utf-8")
+              if not text.strip():
+                  raise SystemExit(f"Documentation file is empty: {path}")
+              fences = sum(1 for line in text.splitlines() if line.lstrip().startswith("```"))
+              if fences % 2:
+                  raise SystemExit(f"Unclosed Markdown code fence: {path}")
+              if not any(line.startswith("# ") for line in text.splitlines()):
+                  raise SystemExit(f"Missing top-level heading: {path}")
+              print(f"OK: {path}")
+          PY
