@@ -1,4 +1,4 @@
-#!/usr/bin/ksh
+#!/usr/bin/ksh shell
 TEMPDIR=$1 
 BUILD=`pwd`
 . build/aix/pkginfo
