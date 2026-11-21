@@ -4,12 +4,23 @@ from __future__ import annotations
 
 import json
 import math
+import struct
 from pathlib import Path
 from typing import Any
 
 
 class ModelFormatError(ValueError):
     """Invalid LMLM CPU model weights or architecture."""
+
+
+def _float32(value: int | float, name: str) -> float:
+    try:
+        converted = struct.unpack("!f", struct.pack("!f", float(value)))[0]
+    except (OverflowError, struct.error) as exc:
+        raise ModelFormatError(f"{name} value is outside the float32 range") from exc
+    if not math.isfinite(converted):
+        raise ModelFormatError(f"{name} contains a non-finite float32 value")
+    return converted
 
 
 def _matrix(value: Any, rows: int, columns: int, name: str) -> list[list[float]]:
@@ -21,7 +32,7 @@ def _matrix(value: Any, rows: int, columns: int, name: str) -> list[list[float]]
             raise ModelFormatError(f"{name} rows must have {columns} columns")
         if any(isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item) for item in row):
             raise ModelFormatError(f"{name} contains a non-finite or non-numeric value")
-        result.append([float(item) for item in row])
+        result.append([_float32(item, name) for item in row])
     return result
 
 
@@ -30,7 +41,7 @@ def _vector(value: Any, size: int, name: str) -> list[float]:
         raise ModelFormatError(f"{name} must contain {size} values")
     if any(isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item) for item in value):
         raise ModelFormatError(f"{name} contains a non-finite or non-numeric value")
-    return [float(item) for item in value]
+    return [_float32(item, name) for item in value]
 
 
 def _linear(vector: list[float], weight: list[list[float]], bias: list[float]) -> list[float]:
