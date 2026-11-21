@@ -1,7 +1,7 @@
 """Backend-neutral LMLM engine lifecycle.
 
-A concrete tokenizer, tensor runtime, and model backend must implement
-EngineBackend. No inference backend is bundled in this foundation.
+NativeCPUBackend is the first bundled implementation of EngineBackend.
+Optimized CPU/GPU and multimodal backends can implement the same contract.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from threading import RLock
-from typing import Protocol, Sequence
+from typing import Protocol
 
 from .manifest import ModelManifest
 
