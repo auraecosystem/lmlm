@@ -75,7 +75,7 @@ class ProcessorHandler(BaseHTTPRequestHandler):
 def main():
     logging.basicConfig(level=os.getenv("LMLM_LOG_LEVEL", "INFO"))
     host = os.getenv("LMLM_PROCESSOR_HOST", "127.0.0.1")
-    if host not in {"127.0.0.1", "localhost", "::1"}:
+    if host not in {"127.0.0.1"}:
         raise SystemExit("LMLM processor service may only bind to loopback")
     port = int(os.getenv("LMLM_PROCESSOR_PORT", "8765"))
     inference_url = os.getenv("LMLM_INFERENCE_URL", "http://127.0.0.1:8080/v1")
