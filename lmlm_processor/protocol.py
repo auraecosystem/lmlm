@@ -25,6 +25,8 @@ class ProcessorRequest:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "ProcessorRequest":
+        if not isinstance(value, dict):
+            raise ProtocolError("request body must be a JSON object")
         if value.get("protocol") != "lmlm.processor.v1" or value.get("protocol_version") != PROTOCOL_VERSION:
             raise ProtocolError("unsupported processor protocol version")
         request_id = value.get("request_id")
