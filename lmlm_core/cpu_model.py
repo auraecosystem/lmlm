@@ -194,22 +194,3 @@ class CPUTransformer:
                 hidden[position] = [hidden[position][i] + contracted[i] for i in range(self.hidden_size)]
         final = _layer_norm(hidden[-1], self.final_norm_scale, self.final_norm_bias)
         return [sum(final[column] * self.token_embedding[token][column] for column in range(self.hidden_size)) for token in range(self.vocab_size)]
-
-    def generate(self, prompt_ids: list[int], max_new_tokens: int, *, temperature: float = 0.0) -> list[int]:
-        if not 1 <= max_new_tokens <= 32768:
-            raise ValueError("max_new_tokens must be between 1 and 32768")
-        if not 0 <= temperature <= 2:
-            raise ValueError("temperature must be between 0 and 2")
-        output = list(prompt_ids)
-        if not output:
-            raise ValueError("prompt_ids cannot be empty")
-        for _ in range(max_new_tokens):
-            context = output[-self.max_seq_len:]
-            scores = self.logits(context)
-            if temperature:
-                scores = [score / temperature for score in scores]
-            next_id = max(range(len(scores)), key=scores.__getitem__)
-            output.append(next_id)
-            if self.eos_token_id is not None and next_id == self.eos_token_id:
-                break
-        return output
