@@ -55,7 +55,9 @@ directory. No automatic downloads are performed.
 {
   "format_version": 1,
   "vocab": {
-    "...": "abbreviated; a real vocabulary has contiguous IDs for every token"
+    "byte-token-0": 0,
+    "byte-token-1": 1,
+    "...": 259
   },
   "merges": [["left-piece", "right-piece"]],
   "bos_token": "<|bos|>",
@@ -64,9 +66,11 @@ directory. No automatic downloads are performed.
 }
 ```
 
-The vocabulary must contain contiguous integer IDs starting at zero. The
-byte-level alphabet must be represented by the vocabulary for lossless
-encoding without an unknown token. Merge entries are ordered by priority.
+The JSON above is an abbreviated illustration, not a complete loadable
+vocabulary. A real vocabulary must contain contiguous integer IDs starting at
+zero. The byte-level alphabet must be represented by the vocabulary for
+lossless encoding without an unknown token. Merge entries are ordered by
+priority.
 
 ### Weights JSON
 
