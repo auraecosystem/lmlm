@@ -30,8 +30,8 @@ def _matrix(value: Any, rows: int, columns: int, name: str) -> list[list[float]]
     for row in value:
         if not isinstance(row, list) or len(row) != columns:
             raise ModelFormatError(f"{name} rows must have {columns} columns")
-        if any(isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item) for item in row):
-            raise ModelFormatError(f"{name} contains a non-finite or non-numeric value")
+        if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in row):
+            raise ModelFormatError(f"{name} contains a non-numeric value")
         result.append([_float32(item, name) for item in row])
     return result
 
@@ -39,8 +39,8 @@ def _matrix(value: Any, rows: int, columns: int, name: str) -> list[list[float]]
 def _vector(value: Any, size: int, name: str) -> list[float]:
     if not isinstance(value, list) or len(value) != size:
         raise ModelFormatError(f"{name} must contain {size} values")
-    if any(isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item) for item in value):
-        raise ModelFormatError(f"{name} contains a non-finite or non-numeric value")
+    if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in value):
+        raise ModelFormatError(f"{name} contains a non-numeric value")
     return [_float32(item, name) for item in value]
 
 
