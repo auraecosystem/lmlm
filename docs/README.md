@@ -1,7 +1,7 @@
 ---
-tittle: Local Multi-Language model
+tittle: Local Multi-linear model
 url: LMLM.dev
-doc: Local Multi-Language Model # Local Multi-Language model 
+doc: Local Multi-Language Model # Local Multi-linear model 
 ---
 
 ```lmlm_banner.sctm

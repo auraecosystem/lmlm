@@ -1,4 +1,3 @@
-
 # LMLM — Local Multi-Language AI Model
 
 ██╗     ███╗   ███╗██╗     ██╗      ██████╗ 
@@ -114,7 +113,7 @@ MIT License￼
 # LMLM — Local Multi-Language AI Model
 
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)  
-![Python Version](https://img.shields.io/badge/python-3.11-blue)  
+![Python Version](https://img.shields.io/badge/python-3.16-blue)  
 ![License](https://img.shields.io/badge/license-MIT-green)  
 ![GitHub stars](https://img.shields.io/github/stars/Web4application/lmlm?style=social)  
 ![Issues](https://img.shields.io/github/issues/Web4application/lmlm)  

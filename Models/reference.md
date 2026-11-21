@@ -1,4 +1,4 @@
-   #  [Documentation[lmlmstudio](file:///private/var/containers/Bundle/Application/61352102-115D-4798-934E-1E7EB868B788/stable.app/error_page_loaded.html?url=https://github.com/Web4application/lmlm/edit/main/PromptStudio.html&dontLoad=true)
+ #  [Documentation[lmlmstudio](file:///private/var/containers/Bundle/Application/61352102-115D-4798-934E-1E7EB868B788/stable.app/error_page_loaded.html?url=https://github.com/Web4application/lmlm/edit/main/PromptStudio.html&dontLoad=true)
    #  [Documentation[lmlmstudio](file:///private/var/containers/Bundle/Application/61352102-115D-4798-934E-1E7EB868B788/stable.app/error_page_loaded.html?url=https://github.com/Web4application/lmlm/edit/main/PromptStudio.html&dontLoad=true)
 
 # lmlm 
@@ -165,7 +165,7 @@ ollama signin
   Next, create and run a simple Python script
 
 ```python  theme={"system"}
-    from ollama import Client
+from ollama import Client
 
     client = Client()
 
@@ -184,19 +184,19 @@ ollama signin
   <Tab title="JavaScript">
     First, pull a cloud model so it can be accessed:
 ```
-  ```bash
+```bash
     ollama pull gpt-oss:120b-cloud
     ```
 ```
 Next, install ``[Ollama's JavaScript library](https://github.com/ollama/ollama-js)``:
 
-    ```nvx
+ ```nvx
     npm i ollama
     ```
 ```
     Then use the library to run a cloud model:
 
-    ```typescript  theme={"system"}
+```typescript  theme={"system"}
     import { Ollama } from "ollama";
 
     const ollama = new Ollama();
@@ -218,10 +218,10 @@ Next, install ``[Ollama's JavaScript library](https://github.com/ollama/ollama-j
 
   ```bash
     ollama pull gpt-oss:120b-cloud
-    ``
-```
-   Run the following cURL command to run the command via Ollama's API:
-  ```curl
+   ```
+
+ Run the following cURL command to run the command via Ollama's API:
+```curl
     curl http://localhost:11434/api/chat -d '{
       "model": "gpt-oss:120b-cloud",
       "messages": [{
@@ -230,7 +230,7 @@ Next, install ``[Ollama's JavaScript library](https://github.com/ollama/ollama-j
       }],
       "stream": false
     }'
-    ```
+   ```
   </Tab>
 </Tabs>
 ```
@@ -243,7 +243,7 @@ Cloud models can also be accessed directly on ollama.com's API. In this mode, ol
 For direct access to ollama.com's API, first create an [API key](https://ollama.com/settings/keys).
 
 Then, set the `OLLAMA_API_KEY` environment variable to your API key.
-```
+
 ```bash
 ollama pull llama3.2
 echo "FROM llama3.2" >> Modelfile
@@ -267,7 +267,7 @@ curl https://ollama.com/api/tags
   <Tab title="Python">
     First, install [Ollama's Python library](https://github.com/ollama/ollama-python)
 
-   ```bash
+```bash
     pip install ollama
 ```
 
@@ -291,12 +291,12 @@ Then make a request
 
     for part in client.chat('gpt-oss:120b', messages=messages, stream=True):
       print(part['message']['content'], end='', flush=True)
-    ```
+```
   </Tab>
 
   <Tab title="JavaScript">
     First, install [Ollama's JavaScript library](https://github.com/ollama/ollama-js)
-```
+
 ```bash
     npm i ollama
   ```
@@ -321,13 +321,13 @@ Then make a request
     for await (const part of response) {
       process.stdout.write(part.message.content);
     }
-    ```
+ ```
   </Tab>
 
   <Tab title="cURL">
     Generate a response via Ollama's chat API:
 
-    ```bash
+ ```bash
     curl https://ollama.com/api/chat \
       -H "Authorization: Bearer $OLLAMA_API_KEY" \
       -d '{
@@ -338,11 +338,12 @@ Then make a request
         }],
         "stream": false
       }'
-    ```
+   ```
   </Tab>
 </Tabs>
 ```
 ## Local only
+
 ```python
 Ollama can run in local-only mode by [disabling Ollama's cloud](./faq#how-do-i-disable-ollama-cloud) features.
 import ollama from 'ollama'
@@ -422,7 +423,7 @@ The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field c
 
     console.log('Thinking:\n', response.message.thinking)
     console.log('Answer:\n', response.message.content)
-    ```
+  ```
   </Tab>
 </Tabs>
 
@@ -436,7 +437,7 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
 
 <Tabs>
   <Tab title="Python">
-  ```python  theme={"system"}
+```python  theme={"system"}
     from ollama import chat
 
     stream = chat(
@@ -460,7 +461,7 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
           print('\n\nAnswer:\n', end='')
           in_thinking = False
         print(chunk.message.content, end=''),
-``
+```
 </Tab>
 <Tab title="JavaScript">
 ```javascript  theme={"system"}
