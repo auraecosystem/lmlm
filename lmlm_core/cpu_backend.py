@@ -36,19 +36,24 @@ class NativeCPUBackend:
         return candidate
 
     def load(self, manifest: ModelManifest, model_dir: str) -> None:
+        if manifest.architecture != "lmlm-cpu-transformer-v1":
+            raise ValueError("manifest architecture must be lmlm-cpu-transformer-v1")
+        if manifest.tensor_dtype != "f32":
+            raise ValueError("native reference CPU backend currently supports f32 weights only")
         weights_path = manifest.resolve_weights(model_dir, require_exists=True)
         tokenizer_path = self._resolve_local(model_dir, manifest.tokenizer)
         tokenizer = ByteLevelBPETokenizer.from_file(tokenizer_path)
         model = CPUTransformer(weights_path)
-        if model.vocab_size != len(tokenizer.vocab):
+        if model.vocab_size != len(tokenizer.vocab) or model.vocab_size != manifest.vocabulary_size:
             raise ValueError(
                 f"model vocabulary size ({model.vocab_size}) does not match "
                 f"tokenizer vocabulary size ({len(tokenizer.vocab)})"
             )
-        if tokenizer.eos_token is not None:
-            eos_id = tokenizer.vocab[tokenizer.eos_token]
-            if model.eos_token_id is not None and model.eos_token_id != eos_id:
-                raise ValueError("model and tokenizer EOS token IDs do not match")
+        eos_id = tokenizer.vocab.get(tokenizer.eos_token) if tokenizer.eos_token else None
+        if model.eos_token_id != eos_id:
+            raise ValueError("model and tokenizer EOS token IDs do not match")
+        if model.max_seq_len != manifest.context_length:
+            raise ValueError("model max_seq_len does not match manifest context_length")
         self._tokenizer = tokenizer
         self._model = model
 
