@@ -13,12 +13,15 @@ import json
 import math
 from pathlib import Path
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # Keep the core package importable without the optional trainer dependency.
+    np = None
 
 from lmlm_core.tokenizer import _BYTE_ENCODER
 
 
-def _layer_norm(values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _layer_norm(values):
     mean = values.mean(axis=1, keepdims=True)
     centered = values - mean
     inv_std = 1.0 / np.sqrt((centered * centered).mean(axis=1, keepdims=True) + 1e-5)
@@ -36,6 +39,8 @@ def train(
     seed: int = 7,
     resume: bool = False,
 ) -> dict:
+    if np is None:
+        raise RuntimeError("tiny-model training requires NumPy; install it with: pip install numpy")
     if not input_path.is_file():
         raise FileNotFoundError(f"training text file not found: {input_path}")
     if input_path.stat().st_size > 8 * 1024 * 1024:
