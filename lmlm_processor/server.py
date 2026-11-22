@@ -86,11 +86,19 @@ def main():
         from .native_backend import NativeCPUProcessorBackend
 
         backend = NativeCPUProcessorBackend(model_dir)
+    elif backend_mode == "native_numpy":
+        model_dir = os.getenv("LMLM_MODEL_DIR")
+        if not model_dir:
+            raise SystemExit("LMLM_MODEL_DIR is required when LMLM_BACKEND=native_numpy")
+        from .native_backend import NativeCPUProcessorBackend
+        from lmlm_core import NumpyCPUBackend
+
+        backend = NativeCPUProcessorBackend(model_dir, backend=NumpyCPUBackend())
     elif backend_mode == "local_openai":
         inference_url = os.getenv("LMLM_INFERENCE_URL", "http://127.0.0.1:8080/v1")
         backend = LocalOpenAIBackend(inference_url)
     else:
-        raise SystemExit("LMLM_BACKEND must be 'native_cpu' or 'local_openai'")
+        raise SystemExit("LMLM_BACKEND must be 'native_cpu', 'native_numpy', or 'local_openai'")
     server = ProcessorServer((host, port), backend)
     LOG.info("LMLM Processor v1 listening on %s:%s", host, port)
     try:
